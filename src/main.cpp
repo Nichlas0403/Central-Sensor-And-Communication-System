@@ -12,8 +12,6 @@
 
 
 
-
-
 //Services
 ESP8266WebServer _server(80);
 HttpClientService _client;
@@ -61,7 +59,7 @@ void sendSMS()
     return;
   }
 
-  _client.SendSMS(arg);
+  _client.SendSMS(_server.arg(arg));
 
   _server.send(200);
 

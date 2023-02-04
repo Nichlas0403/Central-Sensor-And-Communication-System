@@ -8,13 +8,13 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/Nichl/OneDrive/Documents/PlatformIO/Projects/Central Sensor And Communication System/include",
-                "c:/Users/Nichl/OneDrive/Documents/PlatformIO/Projects/Central Sensor And Communication System/src",
+                "C:/Users/Nichl/Tinkering Folder/Projekter/Central-Sensor-And-Communication-System/include",
+                "C:/Users/Nichl/Tinkering Folder/Projekter/Central-Sensor-And-Communication-System/src",
                 "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPClient/src",
                 "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WebServer/src",
                 "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266mDNS/src",
                 "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src",
-                "c:/Users/Nichl/OneDrive/Documents/PlatformIO/Projects/Central Sensor And Communication System/.pio/libdeps/nodemcuv2/ArduinoJson/src",
+                "C:/Users/Nichl/Tinkering Folder/Projekter/Central-Sensor-And-Communication-System/.pio/libdeps/nodemcuv2/ArduinoJson/src",
                 "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/tools/sdk/include",
                 "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/cores/esp8266",
                 "C:/Users/Nichl/.platformio/packages/toolchain-xtensa - Kopi/include",
@@ -56,13 +56,13 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/Nichl/OneDrive/Documents/PlatformIO/Projects/Central Sensor And Communication System/include",
-                    "c:/Users/Nichl/OneDrive/Documents/PlatformIO/Projects/Central Sensor And Communication System/src",
+                    "C:/Users/Nichl/Tinkering Folder/Projekter/Central-Sensor-And-Communication-System/include",
+                    "C:/Users/Nichl/Tinkering Folder/Projekter/Central-Sensor-And-Communication-System/src",
                     "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266HTTPClient/src",
                     "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WebServer/src",
                     "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266mDNS/src",
                     "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/libraries/ESP8266WiFi/src",
-                    "c:/Users/Nichl/OneDrive/Documents/PlatformIO/Projects/Central Sensor And Communication System/.pio/libdeps/nodemcuv2/ArduinoJson/src",
+                    "C:/Users/Nichl/Tinkering Folder/Projekter/Central-Sensor-And-Communication-System/.pio/libdeps/nodemcuv2/ArduinoJson/src",
                     "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/tools/sdk/include",
                     "C:/Users/Nichl/.platformio/packages/framework-arduinoespressif8266/cores/esp8266",
                     "C:/Users/Nichl/.platformio/packages/toolchain-xtensa - Kopi/include",
@@ -103,7 +103,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60105",
+                "PLATFORMIO=60106",
                 "ESP8266",
                 "ARDUINO_ARCH_ESP8266",
                 "ARDUINO_ESP8266_NODEMCU_ESP12E",

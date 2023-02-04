@@ -8,6 +8,9 @@
 class HttpClientService
 {
     private:
+        String _latitude;
+        String _longitude;
+
         String _SMSServiceFingerPrint;
         String _SMSServiceToSMS;
         String _SMSServiceFromSMS;
@@ -20,8 +23,9 @@ class HttpClientService
         String _weatherFingerPrint;
         int _weatherHttpsPort;
         String _weatherHost;
-        String _weatherLatitude;
-        String _weatherLongitude;
+
+        String _dateTimeApiKey;
+        String _dateTimeApiHost;
 
         UrlEncoderDecoderService _urlEncoderDecoder;
         HTTPClient _client;

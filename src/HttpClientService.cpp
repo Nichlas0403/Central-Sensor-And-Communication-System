@@ -42,7 +42,7 @@ String HttpClientService::GetCurrentDateTime()
     Serial.println("");
     Serial.println("-------------- GetCurrentDateTime ------------- ");
 
-    _client.begin(_wifiClient, "http://worldtimeapi.org/api/timezone/Europe/copenhagen");
+    _client.begin(_wifiClient, "http://" + _dateTimeApiHost + "/v2.1/get-time-zone?key=" + _dateTimeApiKey + "&format=json&by=position&lat=" + _latitude + "&lng=" + _longitude);
 
     int httpResponseCode = _client.GET();
 
@@ -56,9 +56,12 @@ String HttpClientService::GetCurrentDateTime()
       else 
       {
         Serial.print("Error code: ");
+        Serial.println(_client.errorToString(httpResponseCode));
         Serial.println(httpResponseCode);
         return "";
       }
+
+      //https://timezonedb.com/
 }
 
 String HttpClientService::GetCurrentWeather()
@@ -66,7 +69,7 @@ String HttpClientService::GetCurrentWeather()
     Serial.println("");
     Serial.println("-------------- GetCurrentWeather ------------- ");
 
-    String url = "https://" + _weatherHost + "/data/2.5/weather?lat=" + _weatherLatitude + "&lon=" + _weatherLongitude + "&appid=" + _weatherApiKey;
+    String url = "https://" + _weatherHost + "/data/2.5/weather?lat=" + _latitude + "&lon=" + _longitude + "&appid=" + _weatherApiKey;
 
     int fingerprintLength = _weatherFingerPrint.length() + 1; 
     char fingerPrintArray[fingerprintLength];
