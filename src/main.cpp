@@ -21,9 +21,6 @@ SensorService _sensorService(_analogInputGPIO, _photoResistorGPIO);
 void restServerRouting();
 void connectToWiFi();
 
-//Endpoints
-void getPhotoresistorReading();
-
 void setup() 
 {
   Serial.begin(9600);

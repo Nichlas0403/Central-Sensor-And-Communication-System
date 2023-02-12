@@ -4,23 +4,19 @@
 HttpClientService::HttpClientService() : _urlEncoderDecoder(), _client(), _wifiClient(), _wifiClientSecure()
 {
 
+
 }
 
 void HttpClientService::SendSMS(String message)
 {
-  Serial.println("");
-  Serial.println("-------------- SendSMS ------------- ");
-
   int fingerprintLength = _SMSServiceFingerPrint.length() + 1; 
   char fingerPrintArray[fingerprintLength];
   _SMSServiceFingerPrint.toCharArray(fingerPrintArray, fingerprintLength);
 
-
-  Serial.println("Setting up client...");
   _wifiClientSecure.setFingerprint(fingerPrintArray);
   if(_wifiClientSecure.connect(_SMSServiceHost, _SMSServiceHttpsPort))
   {
-    Serial.println("Connected to " + _SMSServiceHost);
+    Serial.println("Sending text");
   }
   else
   {
@@ -34,41 +30,11 @@ void HttpClientService::SendSMS(String message)
 
   _client.POST(data);
   _client.end();
-  Serial.println("Connection to " + _SMSServiceHost + " has ended.");
 }
 
-String HttpClientService::GetCurrentDateTime()
-{
-    Serial.println("");
-    Serial.println("-------------- GetCurrentDateTime ------------- ");
-
-    _client.begin(_wifiClient, "http://" + _dateTimeApiHost + "/v2.1/get-time-zone?key=" + _dateTimeApiKey + "&format=json&by=position&lat=" + _latitude + "&lng=" + _longitude);
-
-    int httpResponseCode = _client.GET();
-
-    if (httpResponseCode > 0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
-        String payload = _client.getString();
-        Serial.println(payload);
-        return payload;
-      }
-      else 
-      {
-        Serial.print("Error code: ");
-        Serial.println(_client.errorToString(httpResponseCode));
-        Serial.println(httpResponseCode);
-        return "";
-      }
-
-      //https://timezonedb.com/
-}
 
 String HttpClientService::GetCurrentWeather()
 {
-    Serial.println("");
-    Serial.println("-------------- GetCurrentWeather ------------- ");
-
     String url = "https://" + _weatherHost + "/data/2.5/weather?lat=" + _latitude + "&lon=" + _longitude + "&appid=" + _weatherApiKey;
 
     int fingerprintLength = _weatherFingerPrint.length() + 1; 
@@ -78,7 +44,7 @@ String HttpClientService::GetCurrentWeather()
     _wifiClientSecure.setFingerprint(fingerPrintArray);
     if(_wifiClientSecure.connect(_weatherHost, _weatherHttpsPort))
     {
-      Serial.println("Connected to " + _weatherHost);
+      Serial.println("Retrieving weather data");
     }
     else
     {
@@ -91,17 +57,26 @@ String HttpClientService::GetCurrentWeather()
 
     if (httpResponseCode > 0) 
     {
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
       String payload = _client.getString();
-      Serial.println(payload);
       return payload;
     }
     else 
     {
-      Serial.print("Error code: ");
-      Serial.println(httpResponseCode);
-      return "";
+      return String(httpResponseCode);
     }
 }
 
+
+String HttpClientService::GetCurrentDateTime()
+{
+    Serial.println("Retrieving current datetime");
+
+    WiFiUDP ntpUDP;
+    NTPClient timeClient(ntpUDP, "pool.ntp.org");
+    timeClient.update();
+    unsigned long currentEpoch = timeClient.getEpochTime();
+
+    char currentDateTime[32];
+    sprintf(currentDateTime, "%02d-%02d-%02dTM%02d-%02d-%02d", day(currentEpoch), month(currentEpoch), year(currentEpoch), (hour(currentEpoch) + 1), minute(currentEpoch), second(currentEpoch));
+    return currentDateTime;
+}

@@ -4,6 +4,11 @@
 #include "UrlEncoderDecoder.h"
 #include <ESP8266mDNS.h>
 #include <ESP8266HttpClient.h>
+#include <TimeLib.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
+#include <ArduinoJson.h>
+
 
 class HttpClientService
 {
@@ -23,10 +28,7 @@ class HttpClientService
         String _weatherFingerPrint;
         int _weatherHttpsPort;
         String _weatherHost;
-
-        String _dateTimeApiKey;
-        String _dateTimeApiHost;
-
+        
         UrlEncoderDecoderService _urlEncoderDecoder;
         HTTPClient _client;
         WiFiClient _wifiClient;
