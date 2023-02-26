@@ -1,9 +1,9 @@
 #include "HttpClientService.h"
 #include "Arduino.h"
 
-HttpClientService::HttpClientService() : _urlEncoderDecoder(), _client(), _wifiClient(), _wifiClientSecure()
+// HttpClientService::HttpClientService() : _urlEncoderDecoder(), _client(), _wifiClient(), _wifiClientSecure()
+HttpClientService::HttpClientService() : _urlEncoderDecoder(), _wifiClient(), _wifiClientSecure()
 {
-
 
 }
 
@@ -13,17 +13,19 @@ void HttpClientService::SendSMS(String message)
   char fingerPrintArray[fingerprintLength];
   _SMSServiceFingerPrint.toCharArray(fingerPrintArray, fingerprintLength);
 
-  _wifiClientSecure.setFingerprint(fingerPrintArray);
+
+  _wifiClientSecure.setCACert(ca);
+
   if(_wifiClientSecure.connect(_SMSServiceHost, _SMSServiceHttpsPort))
   {
     Serial.println("Sending text");
   }
   else
   {
-    Serial.println("Could not connect to " + _SMSServiceHost);
+    Serial.println("Could not connect to " + String(_SMSServiceHost));
   }
         
-  _client.begin(_wifiClientSecure, "https://" + _SMSServiceHost + "/2010-04-01/Accounts/" + _SMSServiceAccountIdSMS + "/Messages.json");
+  _client.begin(_wifiClientSecure, "https://" + String(_SMSServiceHost) + "/2010-04-01/Accounts/" + _SMSServiceAccountIdSMS + "/Messages.json");
   _client.addHeader("Content-Type", "application/x-www-form-urlencoded");
   _client.addHeader("Authorization", _SMSServiceToken);
   String data = "To=" + _urlEncoderDecoder.urlencode(_SMSServiceToSMS) + "&From=" + _urlEncoderDecoder.urlencode(_SMSServiceFromSMS) + "&Body=" + _urlEncoderDecoder.urlencode(message);
@@ -35,20 +37,23 @@ void HttpClientService::SendSMS(String message)
 
 String HttpClientService::GetCurrentWeather()
 {
-    String url = "https://" + _weatherHost + "/data/2.5/weather?lat=" + _latitude + "&lon=" + _longitude + "&appid=" + _weatherApiKey;
+    String url = "https://" + String(_weatherHost) + "/data/2.5/weather?lat=" + _latitude + "&lon=" + _longitude + "&appid=" + _weatherApiKey;
 
     int fingerprintLength = _weatherFingerPrint.length() + 1; 
     char fingerPrintArray[fingerprintLength];
     _weatherFingerPrint.toCharArray(fingerPrintArray, fingerprintLength);
 
-    _wifiClientSecure.setFingerprint(fingerPrintArray);
+
+
+    _wifiClientSecure.setCACert(ca);
+
     if(_wifiClientSecure.connect(_weatherHost, _weatherHttpsPort))
     {
       Serial.println("Retrieving weather data");
     }
     else
     {
-      Serial.println("Could not connect to " + _weatherHost);
+      Serial.println("Could not connect to " + String(_weatherHost));
     }
 
     _client.begin(_wifiClientSecure, url);

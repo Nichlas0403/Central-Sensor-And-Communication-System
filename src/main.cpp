@@ -1,38 +1,88 @@
 #include "SensorService.h"
 #include "HttpClientService.h"
+#include "EEPROM.h"
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <ESP8266WebServer.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <WebServer.h>
+#include <SPI.h>
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+// #include <ESP8266WiFi.h>
+// #include <ESP8266mDNS.h>
+// #include <ESP8266WebServer.h>
 
 //Core values
-#define _analogInputGPIO A0
-#define _photoResistorGPIO D5
-#define _humidityAndTemperatureGPIO D6
-
-
+// #define _analogInputGPIO A0
+// #define _photoResistorGPIO D5
+// #define _humidityAndTemperatureGPIO D6
 
 //Services
-ESP8266WebServer _server(80);
+WebServer _server(80);
 HttpClientService _client;
-SensorService _sensorService(_analogInputGPIO, _photoResistorGPIO);
 
-//Core server functionality
-void restServerRouting();
+
+//Certificate expiration
+const int SmsCaExpirationYear = 2031;
+const int SmsCaExpirationMonth = 10; //one month before expiration
+const int weatherCaExpirationYear = 2038;
+const int weatherCaExpirationMonth = 12; //one month before expiration
+
+bool smsCaExpirationNotified = false;
+bool weatherCaExpirationNotified = false;
+
+//Certificate checks
+unsigned long timeBetweenCertificateChecks = 86400000; //24 hours
+unsigned long lastCertificateCheck;
+
 void connectToWiFi();
 
-void setup() 
-{
-  Serial.begin(9600);
-  pinMode(_analogInputGPIO, INPUT);
-  pinMode(_photoResistorGPIO, OUTPUT);
-  connectToWiFi();
+void setup() {
+    Serial.begin(9600);
+    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+    connectToWiFi();
+    WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 1); //disable brownout detector
 }
 
 void loop() 
 {
   _server.handleClient();
   delay(1);
+
+  unsigned long currentTime = millis();
+
+  if(currentTime < lastCertificateCheck) //currentTime has exceeded unsigned long max value
+    ESP.restart();
+
+  if(currentTime - lastCertificateCheck > timeBetweenCertificateChecks)
+  {
+
+    lastCertificateCheck = currentTime;
+
+    String currentDate = _client.GetCurrentDateTime();
+    int currentMonth = currentDate.substring(3,5).toInt();
+    int currentYear = currentDate.substring(6,10).toInt();
+
+    //sms CA Check
+    if(currentYear == SmsCaExpirationYear)
+      if(currentMonth == SmsCaExpirationMonth)
+        if(!smsCaExpirationNotified)
+        {
+          _client.SendSMS("SMS CA is 1 month from expiring");
+          smsCaExpirationNotified = true;
+        }
+
+    //sms CA Check
+    if(currentYear == weatherCaExpirationYear)
+      if(currentMonth == weatherCaExpirationMonth) 
+        if(!weatherCaExpirationNotified)
+        {
+          _client.SendSMS("Weather CA is 1 month from expiring");
+          weatherCaExpirationNotified = true;
+        }
+
+  }
+
 }
 
 
@@ -45,7 +95,7 @@ void loop()
 // ------------------------------------- SERVER ------------------------------------------
 
 
-//ENDPOINTS
+// ENDPOINTS
 void sendSMS()
 {
   String arg = "message";
@@ -68,11 +118,11 @@ void healthCheck()
   
 }
 
-void getPhotoresistorReading()
-{
-  _server.send(200, "text/json", String(_sensorService.GetPhotoresistorReading()));
+// void getPhotoresistorReading()
+// {
+//   _server.send(200, "text/json", String(_sensorService.GetPhotoresistorReading()));
   
-}
+// }
 
 void getCurrentDateTime()
 {
@@ -89,17 +139,40 @@ void getWeather()
 
 }
 
-// Core server functionality
+void WiFiChecks() //Checks if certain wifi SSID's are within range
+{
+    int networks = WiFi.scanNetworks();
+
+    bool wifiWithinRange = false;
+
+    for(int i = 0; i < networks; i++)
+    {
+      String currentSSID = WiFi.SSID(i);
+
+      if(currentSSID == phone1 || currentSSID == phone2)
+      {
+        Serial.println(currentSSID);
+        wifiWithinRange = true;
+        break;
+      }
+    }
+
+    _server.send(200, "text/json", String(wifiWithinRange));
+}
+
+// // Core server functionality
 void restServerRouting() 
 {
   //HTTP services
+  
   _server.on(F("/send-SMS"), HTTP_POST, sendSMS);
   _server.on(F("/health-check"), HTTP_GET, healthCheck);
   _server.on(F("/current-datetime"), HTTP_GET, getCurrentDateTime);
   _server.on(F("/weather"), HTTP_GET, getWeather);
+  _server.on(F("/wifi-check"), HTTP_GET, WiFiChecks);
 
   //Sensor services
-  _server.on(F("/photoresistor-value"), HTTP_GET, getPhotoresistorReading);
+  // _server.on(F("/photoresistor-value"), HTTP_GET, getPhotoresistorReading);
 }
 
 void handleNotFound() 
@@ -123,47 +196,23 @@ void handleNotFound()
 
 void connectToWiFi()
 {
-  WiFi.mode(WIFI_STA);
-
-  if (WiFi.SSID() != _wifiName) 
-  {
-    Serial.println("Creating new connection to wifi");
-    WiFi.begin(_wifiName, _wifiPassword);
-    WiFi.persistent(true);
-    WiFi.setAutoConnect(true);
-    WiFi.setAutoReconnect(true);
-  }
-  else
-  {
-    Serial.println("Using existing wifi settings...");
-  }
-
- 
-  // Wait for connection
+  // Connect to Wi-Fi network with SSID and password
+  WiFi.begin(_wifiName, _wifiPassword);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(_wifiName);
-  Serial.print("IP address: ");
+  // Print local IP address and start web server
+  Serial.println("WiFi connected.");
+  Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
- 
-  // Activate mDNS this is used to be able to connect to the server
-  // with local DNS hostmane esp8266.local
-  if (MDNS.begin("esp8266")) {
-    Serial.println("MDNS responder started");
-  }
- 
-  // Set server routing
+
   restServerRouting();
   // Set not found response
   _server.onNotFound(handleNotFound);
-  // Start server
-  _server.begin();
 
-  Serial.println("HTTP server started");
+  _server.begin();
+  Serial.println("Server started!");
 }
 
 
