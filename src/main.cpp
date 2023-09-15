@@ -10,7 +10,8 @@
 #define _photoResistorGPIO D5
 #define _humidityAndTemperatureGPIO D6
 
-
+String _wifiName = "";
+String _wifiPassword = "";
 
 //Services
 ESP8266WebServer _server(80);
