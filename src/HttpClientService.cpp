@@ -17,19 +17,19 @@ void HttpClientService::SendSMS(String message)
   if(_wifiClientSecure.connect(_SMSServiceHost, _SMSServiceHttpsPort))
   {
     Serial.println("Sending text");
+
+    _client.begin(_wifiClientSecure, "https://" + _SMSServiceHost + "/2010-04-01/Accounts/" + _SMSServiceAccountIdSMS + "/Messages.json");
+    _client.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    _client.addHeader("Authorization", _SMSServiceToken);
+    String data = "To=" + _urlEncoderDecoder.urlencode(_SMSServiceToSMS) + "&From=" + _urlEncoderDecoder.urlencode(_SMSServiceFromSMS) + "&Body=" + _urlEncoderDecoder.urlencode(message);
+    _client.POST(data);
+    _client.end();
   }
   else
   {
     Serial.println("Could not connect to " + _SMSServiceHost);
   }
         
-  _client.begin(_wifiClientSecure, "https://" + _SMSServiceHost + "/2010-04-01/Accounts/" + _SMSServiceAccountIdSMS + "/Messages.json");
-  _client.addHeader("Content-Type", "application/x-www-form-urlencoded");
-  _client.addHeader("Authorization", _SMSServiceToken);
-  String data = "To=" + _urlEncoderDecoder.urlencode(_SMSServiceToSMS) + "&From=" + _urlEncoderDecoder.urlencode(_SMSServiceFromSMS) + "&Body=" + _urlEncoderDecoder.urlencode(message);
-
-  _client.POST(data);
-  _client.end();
 }
 
 
