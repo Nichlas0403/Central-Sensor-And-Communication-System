@@ -8,7 +8,6 @@
 //Core values
 #define _analogInputGPIO A0
 #define _photoResistorGPIO D5
-#define _humidityAndTemperatureGPIO D6
 
 String _wifiName = "";
 String _wifiPassword = "";
