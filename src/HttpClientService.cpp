@@ -3,7 +3,7 @@
 
 HttpClientService::HttpClientService() : _urlEncoderDecoder(), _client(), _wifiClient(), _wifiClientSecure()
 {
-
+  
 
 }
 
@@ -76,7 +76,29 @@ String HttpClientService::GetCurrentDateTime()
     timeClient.update();
     unsigned long currentEpoch = timeClient.getEpochTime();
 
+    // Define the rules for Denmark's standard time (CET) and daylight saving time (CEST)
+    TimeChangeRule CET = {"CET ", Last, Sun, Oct, 2, 60};   // UTC+1
+    TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120}; // UTC+2
+
+    // Create a Timezone object with the rules
+    Timezone tz(CET, CEST);
+
+    // Convert UTC time to local time using the Timezone object
+    time_t localTime = tz.toLocal(currentEpoch);
+
+    // Extract local hours, minutes, and seconds
+    int localHours = hour(localTime);
+    int localMinutes = minute(localTime);
+    int localSeconds = second(localTime);
+
+    // Extract local day, month, and year
+    int localDay = day(localTime);
+    int localMonth = month(localTime);
+    int localYear = year(localTime);
+
+    // Create a formatted string with the local date and time
     char currentDateTime[32];
-    sprintf(currentDateTime, "%02d-%02d-%02dTM%02d-%02d-%02d", day(currentEpoch), month(currentEpoch), year(currentEpoch), (hour(currentEpoch) + 1), minute(currentEpoch), second(currentEpoch));
-    return currentDateTime;
+    snprintf(currentDateTime, sizeof(currentDateTime), "%02d-%02d-%02dTM%02d:%02d:%02d", localDay, localMonth, localYear, localHours, localMinutes, localSeconds);
+
+    return String(currentDateTime);
 }

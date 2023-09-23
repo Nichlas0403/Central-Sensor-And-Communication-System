@@ -8,6 +8,7 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include <ArduinoJson.h>
+#include <Timezone.h>
 
 
 class HttpClientService
